@@ -1,0 +1,28 @@
+{
+  "port": 2002,
+  "appName": "invoice-service",
+  "appEnv": "local",
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "name": "invoice_service",
+    "username": "root",
+    "password": "root_password",
+    "maxOpenConnection": 10,
+    "maxLifetimeConnection": 10,
+    "maxIdleConnection": 10,
+    "maxIdleTime": 10
+  },
+  "rateLimiterMaxRequest": 1000,
+  "rateLimiterTimeSecond": 60,
+  "kafka": {
+    "brokers": ["localhost:9092"],
+    "timeoutInMs": 100,
+    "maxRetry": 3,
+    "maxWaitTimeInMs": 100,
+    "maxProcessingTimeInMs": 200,
+    "backoffTimeInMs": 100,
+    "topics": [],
+    "groupID": ""
+  }
+}
