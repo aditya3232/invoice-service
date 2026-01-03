@@ -1,0 +1,69 @@
+package repositories
+
+import (
+	"context"
+	"errors"
+	"invoice-service/domain/dto"
+	"invoice-service/domain/models"
+
+	errWrap "invoice-service/common/error"
+	errConstant "invoice-service/constants/error"
+
+	"gorm.io/gorm"
+)
+
+type InvoiceRepository struct {
+	db *gorm.DB
+}
+
+type IInvoiceRepository interface {
+	FindByID(context.Context, int) (*models.Invoice, error)
+	Create(context.Context, *dto.InvoiceRequest) (*models.Invoice, error)
+	FindAllWithoutPagination(context.Context) ([]models.Invoice, error)
+}
+
+func NewInvoiceRepository(db *gorm.DB) IInvoiceRepository {
+	return &InvoiceRepository{db: db}
+}
+
+func (r *InvoiceRepository) FindByID(ctx context.Context, id int) (*models.Invoice, error) {
+	var invoice models.Invoice
+
+	err := r.db.WithContext(ctx).Where("id = ?", id).First(&invoice).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errConstant.ErrInvoiceNotFound
+		}
+		return nil, errWrap.WrapError(errConstant.ErrSQLError)
+	}
+
+	return &invoice, nil
+}
+
+func (r *InvoiceRepository) Create(ctx context.Context, req *dto.InvoiceRequest) (*models.Invoice, error) {
+	invoice := models.Invoice{
+		CustomerID: req.CustomerID,
+		Amount:     req.Amount,
+		Currency:   req.Currency,
+		DueDate:    req.DueDate,
+		Status:     req.Status,
+	}
+
+	err := r.db.WithContext(ctx).Create(&invoice).Error
+	if err != nil {
+		return nil, errWrap.WrapError(errConstant.ErrSQLError)
+	}
+
+	return &invoice, nil
+}
+
+func (r *InvoiceRepository) FindAllWithoutPagination(ctx context.Context) ([]models.Invoice, error) {
+	var invoices []models.Invoice
+
+	err := r.db.WithContext(ctx).Find(&invoices).Error
+	if err != nil {
+		return nil, errWrap.WrapError(errConstant.ErrSQLError)
+	}
+
+	return invoices, nil
+}
