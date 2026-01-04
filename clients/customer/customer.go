@@ -24,8 +24,6 @@ func (u *CustomerClient) FindByID(ctx context.Context, id int) (*CustomerData, e
 	request := u.client.Client().
 		Get(fmt.Sprintf("%s/api/v1/customers/%d", u.client.BaseURL(), id))
 
-	fmt.Println("FULL URL =", u.client.BaseURL())
-
 	resp, _, errs := request.EndStruct(&response)
 	if len(errs) > 0 {
 		return nil, errs[0]
