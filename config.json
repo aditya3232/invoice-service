@@ -24,5 +24,10 @@
     "backoffTimeInMs": 100,
     "topics": [],
     "groupID": ""
+  },
+  "internalService": {
+    "user": {
+      "host": "localhost:2001"
+    }
   }
 }

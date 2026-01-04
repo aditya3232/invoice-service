@@ -11,13 +11,13 @@ type Registry struct {
 }
 
 type IRepositoryRegistry interface {
-	GetCustomer() invoiceRepo.IInvoiceRepository
+	GetInvoice() invoiceRepo.IInvoiceRepository
 }
 
 func NewRepositoryRegistry(db *gorm.DB) IRepositoryRegistry {
 	return &Registry{db: db}
 }
 
-func (r *Registry) GetCustomer() invoiceRepo.IInvoiceRepository {
+func (r *Registry) GetInvoice() invoiceRepo.IInvoiceRepository {
 	return invoiceRepo.NewInvoiceRepository(r.db)
 }

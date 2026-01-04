@@ -10,13 +10,14 @@ import (
 var Config AppConfig
 
 type AppConfig struct {
-	Port                  int      `json:"port"`
-	AppName               string   `json:"appName"`
-	AppEnv                string   `json:"appEnv"`
-	Database              Database `json:"database"`
-	RateLimiterMaxRequest float64  `json:"rateLimiterMaxRequest"`
-	RateLimiterTimeSecond int      `json:"rateLimiterTimeSecond"`
-	Kafka                 Kafka    `json:"kafka"`
+	Port                  int             `json:"port"`
+	AppName               string          `json:"appName"`
+	AppEnv                string          `json:"appEnv"`
+	Database              Database        `json:"database"`
+	RateLimiterMaxRequest float64         `json:"rateLimiterMaxRequest"`
+	RateLimiterTimeSecond int             `json:"rateLimiterTimeSecond"`
+	Kafka                 Kafka           `json:"kafka"`
+	InternalService       InternalService `json:"internalService"`
 }
 
 type Database struct {
@@ -40,6 +41,14 @@ type Kafka struct {
 	MaxWaitTimeInMs       int      `json:"maxWaitTimeInMs"`
 	MaxProcessingTimeInMs int      `json:"maxProcessingTimeInMs"`
 	BackOffTimeInMs       int      `json:"backOffTimeInMs"`
+}
+
+type Customer struct {
+	Host string `json:"host"`
+}
+
+type InternalService struct {
+	Customer Customer `json:"customer"`
 }
 
 func Init() {
