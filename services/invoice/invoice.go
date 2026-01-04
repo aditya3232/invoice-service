@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"errors"
 	"invoice-service/clients"
 	"invoice-service/constants"
 	errConstant "invoice-service/constants/error"
@@ -186,7 +185,7 @@ func (s *InvoiceService) HandlePayment(ctx context.Context, req *dto.PaymentData
 	newPaidAmount := invoice.PaidAmount + req.Amount
 
 	if newPaidAmount > invoice.Amount {
-		return errors.New("paid amount exceeds invoice amount")
+		return errConstant.ErrPaidAmountExceeds
 	}
 
 	var newStatus string
