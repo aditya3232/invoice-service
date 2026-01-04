@@ -5,6 +5,7 @@ import (
 	"errors"
 	"invoice-service/domain/dto"
 	"invoice-service/domain/models"
+	"time"
 
 	errWrap "invoice-service/common/error"
 	errConstant "invoice-service/constants/error"
@@ -41,15 +42,20 @@ func (r *InvoiceRepository) FindByID(ctx context.Context, id int) (*models.Invoi
 }
 
 func (r *InvoiceRepository) Create(ctx context.Context, req *dto.InvoiceRequest) (*models.Invoice, error) {
+	dueDate, err := time.Parse("2006-01-02", req.DueDate)
+	if err != nil {
+		return nil, errWrap.WrapError(errConstant.ErrInternalServerError)
+	}
+
 	invoice := models.Invoice{
 		CustomerID: req.CustomerID,
 		Amount:     req.Amount,
 		Currency:   req.Currency,
-		DueDate:    req.DueDate,
+		DueDate:    dueDate,
 		Status:     req.Status,
 	}
 
-	err := r.db.WithContext(ctx).Create(&invoice).Error
+	err = r.db.WithContext(ctx).Create(&invoice).Error
 	if err != nil {
 		return nil, errWrap.WrapError(errConstant.ErrSQLError)
 	}

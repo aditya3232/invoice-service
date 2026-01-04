@@ -9,7 +9,7 @@ type InvoiceRequest struct {
 	CustomerID int                           `json:"customer_id" validate:"required,gt=0"`
 	Amount     float64                       `json:"amount" validate:"required,gt=0"`
 	Currency   string                        `json:"currency" validate:"required,oneof=IDR USD"`
-	DueDate    time.Time                     `json:"due_date" validate:"required"`
+	DueDate    string                        `json:"due_date" validate:"required,datetime=2006-01-02"`
 	Status     constants.InvoiceStatusString `json:"status"`
 }
 

@@ -26,8 +26,8 @@
     "groupID": ""
   },
   "internalService": {
-    "user": {
-      "host": "localhost:2001"
+    "customer": {
+      "host": "http://localhost:2001"
     }
   }
 }
