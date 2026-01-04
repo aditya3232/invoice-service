@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"invoice-service/clients"
 	"invoice-service/constants"
 	errConstant "invoice-service/constants/error"
@@ -22,6 +23,7 @@ type IInvoiceService interface {
 	Create(context.Context, *dto.InvoiceRequest) (*dto.InvoiceResponse, error)
 	FindAllWithoutPagination(context.Context, *dto.InvoiceRequestParam) ([]dto.InvoiceResponse, error)
 	StartMarkOverdueJob(context.Context, time.Duration) error
+	HandlePayment(context.Context, *dto.PaymentData) error
 }
 
 func NewInvoiceService(repository repositories.IRepositoryRegistry, client clients.IClientRegistry) IInvoiceService {
@@ -171,6 +173,42 @@ func (s *InvoiceService) StartMarkOverdueJob(ctx context.Context, interval time.
 			}
 		}
 	}()
+
+	return nil
+}
+
+func (s *InvoiceService) HandlePayment(ctx context.Context, req *dto.PaymentData) error {
+	invoice, err := s.FindByID(ctx, req.InvoiceID)
+	if err != nil {
+		return err
+	}
+
+	newPaidAmount := invoice.PaidAmount + req.Amount
+
+	if newPaidAmount > invoice.Amount {
+		return errors.New("paid amount exceeds invoice amount")
+	}
+
+	var newStatus string
+	switch {
+	case newPaidAmount == invoice.Amount:
+		newStatus = string(constants.Paid)
+	case newPaidAmount > 0:
+		newStatus = string(constants.PartiallyPaid)
+	default:
+		newStatus = string(constants.Unpaid)
+	}
+
+	updateReq := &dto.InvoiceUpdateRequest{
+		Status:     constants.InvoiceStatusString(newStatus),
+		PaidAmount: newPaidAmount,
+		UpdatedAt:  time.Now(),
+	}
+
+	err = s.repository.GetInvoice().Update(ctx, updateReq, req.InvoiceID)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

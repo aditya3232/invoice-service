@@ -22,8 +22,8 @@
     "maxWaitTimeInMs": 100,
     "maxProcessingTimeInMs": 200,
     "backoffTimeInMs": 100,
-    "topics": [],
-    "groupID": ""
+    "topics": ["payments.created"],
+    "groupID": "invoice-service"
   },
   "internalService": {
     "customer": {

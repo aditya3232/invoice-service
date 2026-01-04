@@ -99,3 +99,10 @@ func BindFromConsul(dest any, endPoint, path string) error {
 
 	return nil
 }
+
+func Recover() {
+	if r := recover(); r != nil {
+		logrus.SetLevel(logrus.ErrorLevel)
+		logrus.Errorf("recovered from panic: %v", r)
+	}
+}
