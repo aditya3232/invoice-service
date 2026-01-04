@@ -65,6 +65,12 @@ func (s *InvoiceService) MarkOverdue(ctx context.Context, invoiceID int) (*dto.I
 		return nil, errConstant.ErrMarkOverdueNotOverdueYet
 	}
 
+	// invalid status
+	if invoice.Status != constants.Unpaid &&
+		invoice.Status != constants.PartiallyPaid {
+		return nil, errConstant.ErrMarkOverdueInvalidStatus
+	}
+
 	updateReq := &dto.InvoiceUpdateRequest{
 		Status:    constants.Overdue,
 		UpdatedAt: time.Now(),
