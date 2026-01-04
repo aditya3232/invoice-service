@@ -91,8 +91,12 @@ func (s *InvoiceService) MarkOverdue(ctx context.Context, invoiceID int) (*dto.I
 }
 
 func (s *InvoiceService) Create(ctx context.Context, req *dto.InvoiceRequest) (*dto.InvoiceResponse, error) {
-	_, err := s.client.GetCustomer().FindByID(ctx, req.CustomerID)
+	customer, err := s.client.GetCustomer().FindByID(ctx, req.CustomerID)
 	if err != nil {
+		return nil, errConstant.ErrCustomerNotFound
+	}
+
+	if customer.Status != "ACTIVE" {
 		return nil, errConstant.ErrCustomerNotFound
 	}
 
