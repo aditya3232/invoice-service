@@ -91,6 +91,31 @@ func (c *InvoiceController) Create(ctx *gin.Context) {
 }
 
 func (c *InvoiceController) FindAllWithoutPagination(ctx *gin.Context) {
+	var params dto.InvoiceRequestParam
+	err := ctx.ShouldBindQuery(&params)
+	if err != nil {
+		response.HttpResponse(response.ParamHTTPResp{
+			Code: http.StatusBadRequest,
+			Err:  err,
+			Gin:  ctx,
+		})
+		return
+	}
+
+	validate := validator.New()
+	if err = validate.Struct(params); err != nil {
+		errMessage := http.StatusText(http.StatusUnprocessableEntity)
+		errorResponse := errWrap.ErrValidationResponse(err)
+		response.HttpResponse(response.ParamHTTPResp{
+			Err:     err,
+			Code:    http.StatusUnprocessableEntity,
+			Message: &errMessage,
+			Data:    errorResponse,
+			Gin:     ctx,
+		})
+		return
+	}
+
 	invoices, err := c.service.GetInvoice().FindAllWithoutPagination(ctx)
 	if err != nil {
 		response.HttpResponse(response.ParamHTTPResp{

@@ -13,6 +13,10 @@ type InvoiceRequest struct {
 	Status     constants.InvoiceStatusString `json:"status"`
 }
 
+type InvoiceRequestParam struct {
+	CustomerID *int `form:"customer_id"`
+}
+
 type InvoiceResponse struct {
 	ID         int                           `json:"id"`
 	CustomerID int                           `json:"customer_id"`
