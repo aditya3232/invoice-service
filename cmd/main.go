@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"invoice-service/clients"
 	"invoice-service/common/response"
@@ -50,6 +51,11 @@ var command = &cobra.Command{
 		repository := repositories.NewRepositoryRegistry(db)
 		service := services.NewServiceRegistry(repository, client)
 		controller := controllers.NewControllerregistry(service)
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		service.GetInvoice().StartMarkOverdueJob(ctx, 5*time.Minute)
 
 		serveHttp(controller)
 	},

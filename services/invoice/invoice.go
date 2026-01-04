@@ -7,6 +7,7 @@ import (
 	errConstant "invoice-service/constants/error"
 	"invoice-service/domain/dto"
 	"invoice-service/repositories"
+	"log"
 	"time"
 )
 
@@ -20,6 +21,7 @@ type IInvoiceService interface {
 	MarkOverdue(context.Context, int) (*dto.InvoiceMarkOverdueResponse, error)
 	Create(context.Context, *dto.InvoiceRequest) (*dto.InvoiceResponse, error)
 	FindAllWithoutPagination(context.Context, *dto.InvoiceRequestParam) ([]dto.InvoiceResponse, error)
+	StartMarkOverdueJob(context.Context, time.Duration) error
 }
 
 func NewInvoiceService(repository repositories.IRepositoryRegistry, client clients.IClientRegistry) IInvoiceService {
@@ -64,7 +66,8 @@ func (s *InvoiceService) MarkOverdue(ctx context.Context, invoiceID int) (*dto.I
 	}
 
 	updateReq := &dto.InvoiceUpdateRequest{
-		Status: constants.Overdue,
+		Status:    constants.Overdue,
+		UpdatedAt: time.Now(),
 	}
 
 	err = s.repository.GetInvoice().Update(ctx, updateReq, invoiceID)
@@ -136,4 +139,32 @@ func (s *InvoiceService) FindAllWithoutPagination(ctx context.Context, req *dto.
 	}
 
 	return invoiceResults, nil
+}
+
+func (s *InvoiceService) StartMarkOverdueJob(ctx context.Context, interval time.Duration) error {
+	jobName := "invoice-overdue-job"
+	log.Printf("[%s] STARTED | interval=%s\n", jobName, interval)
+	ticker := time.NewTicker(interval)
+
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				log.Printf("[%s] RUNNING | checking overdue invoices\n", jobName)
+
+				if err := s.repository.GetInvoice().MarkOverdueInvoices(ctx); err != nil {
+					log.Printf("[%s] ERROR | mark overdue failed | err=%v\n", jobName, err)
+				} else {
+					log.Printf("[%s] SUCCESS | overdue invoices updated\n", jobName)
+				}
+
+			case <-ctx.Done():
+				ticker.Stop()
+				log.Printf("[%s] STOPPED | context cancelled\n", jobName)
+				return
+			}
+		}
+	}()
+
+	return nil
 }

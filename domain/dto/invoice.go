@@ -14,7 +14,8 @@ type InvoiceRequest struct {
 }
 
 type InvoiceUpdateRequest struct {
-	Status constants.InvoiceStatusString `json:"status"`
+	Status    constants.InvoiceStatusString `json:"status"`
+	UpdatedAt time.Time                     `json:"updated_at"`
 }
 
 type InvoiceRequestParam struct {

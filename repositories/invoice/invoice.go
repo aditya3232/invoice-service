@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"errors"
+	"invoice-service/constants"
 	"invoice-service/domain/dto"
 	"invoice-service/domain/models"
 	"time"
@@ -22,6 +23,7 @@ type IInvoiceRepository interface {
 	Create(context.Context, *dto.InvoiceRequest) (*models.Invoice, error)
 	Update(context.Context, *dto.InvoiceUpdateRequest, int) error
 	FindAllWithoutPagination(context.Context, *dto.InvoiceRequestParam) ([]models.Invoice, error)
+	MarkOverdueInvoices(context.Context) error
 }
 
 func NewInvoiceRepository(db *gorm.DB) IInvoiceRepository {
@@ -86,4 +88,25 @@ func (r *InvoiceRepository) FindAllWithoutPagination(ctx context.Context, req *d
 	}
 
 	return invoices, nil
+}
+
+func (r *InvoiceRepository) MarkOverdueInvoices(ctx context.Context) error {
+	err := r.db.WithContext(ctx).
+		Model(&models.Invoice{}).
+		Where("due_date < ?", time.Now()).
+		Where("paid_amount < amount").
+		Where("status IN ?", []string{
+			string(constants.Unpaid),
+			string(constants.PartiallyPaid),
+		}).
+		Updates(map[string]any{
+			"status":     constants.Overdue,
+			"updated_at": time.Now(),
+		}).Error
+
+	if err != nil {
+		errWrap.WrapError(errConstant.ErrSQLError)
+	}
+
+	return nil
 }
