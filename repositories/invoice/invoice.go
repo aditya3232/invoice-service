@@ -20,6 +20,7 @@ type InvoiceRepository struct {
 type IInvoiceRepository interface {
 	FindByID(context.Context, int) (*models.Invoice, error)
 	Create(context.Context, *dto.InvoiceRequest) (*models.Invoice, error)
+	Update(context.Context, *dto.InvoiceUpdateRequest, int) error
 	FindAllWithoutPagination(context.Context, *dto.InvoiceRequestParam) ([]models.Invoice, error)
 }
 
@@ -61,6 +62,15 @@ func (r *InvoiceRepository) Create(ctx context.Context, req *dto.InvoiceRequest)
 	}
 
 	return &invoice, nil
+}
+
+func (r *InvoiceRepository) Update(ctx context.Context, req *dto.InvoiceUpdateRequest, invoiceID int) error {
+	err := r.db.WithContext(ctx).Model(&models.Invoice{}).Where("id = ?", invoiceID).Updates(req).Error
+	if err != nil {
+		errWrap.WrapError(errConstant.ErrSQLError)
+	}
+
+	return nil
 }
 
 func (r *InvoiceRepository) FindAllWithoutPagination(ctx context.Context, req *dto.InvoiceRequestParam) ([]models.Invoice, error) {

@@ -24,4 +24,5 @@ func (r *InvoiceRoute) Run() {
 	group.GET("", r.controller.GetInvoice().FindAllWithoutPagination)
 	group.GET("/:id", r.controller.GetInvoice().FindByID)
 	group.POST("", r.controller.GetInvoice().Create)
+	group.POST("/:id/mark-overdue", r.controller.GetInvoice().MarkOverdue)
 }

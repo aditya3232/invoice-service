@@ -6,7 +6,7 @@ const (
 	Unpaid        InvoiceStatusString = "UNPAID"
 	PartiallyPaid InvoiceStatusString = "PARTIALLY_PAID"
 	Paid          InvoiceStatusString = "PAID"
-	Overdue       InvoiceStatusString = "overdue"
+	Overdue       InvoiceStatusString = "OVERDUE"
 )
 
 func (s InvoiceStatusString) IsValid() bool {

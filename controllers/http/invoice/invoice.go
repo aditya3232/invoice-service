@@ -19,6 +19,7 @@ type InvoiceController struct {
 
 type IInvoiceController interface {
 	FindByID(*gin.Context)
+	MarkOverdue(*gin.Context)
 	Create(*gin.Context)
 	FindAllWithoutPagination(*gin.Context)
 }
@@ -42,6 +43,25 @@ func (c *InvoiceController) FindByID(ctx *gin.Context) {
 	response.HttpResponse(response.ParamHTTPResp{
 		Code: http.StatusOK,
 		Data: invoice,
+		Gin:  ctx,
+	})
+}
+
+func (c *InvoiceController) MarkOverdue(ctx *gin.Context) {
+	reqID, _ := strconv.Atoi(ctx.Param("id"))
+	markOverdue, err := c.service.GetInvoice().MarkOverdue(ctx.Request.Context(), reqID)
+	if err != nil {
+		response.HttpResponse(response.ParamHTTPResp{
+			Code: http.StatusBadRequest,
+			Err:  err,
+			Gin:  ctx,
+		})
+		return
+	}
+
+	response.HttpResponse(response.ParamHTTPResp{
+		Code: http.StatusOK,
+		Data: markOverdue,
 		Gin:  ctx,
 	})
 }

@@ -7,6 +7,7 @@ import (
 	errConstant "invoice-service/constants/error"
 	"invoice-service/domain/dto"
 	"invoice-service/repositories"
+	"time"
 )
 
 type InvoiceService struct {
@@ -16,6 +17,7 @@ type InvoiceService struct {
 
 type IInvoiceService interface {
 	FindByID(context.Context, int) (*dto.InvoiceResponse, error)
+	MarkOverdue(context.Context, int) (*dto.InvoiceMarkOverdueResponse, error)
 	Create(context.Context, *dto.InvoiceRequest) (*dto.InvoiceResponse, error)
 	FindAllWithoutPagination(context.Context, *dto.InvoiceRequestParam) ([]dto.InvoiceResponse, error)
 }
@@ -40,6 +42,39 @@ func (s *InvoiceService) FindByID(ctx context.Context, id int) (*dto.InvoiceResp
 		Status:     invoice.Status,
 		CreatedAt:  invoice.CreatedAt,
 		UpdatedAt:  invoice.UpdatedAt,
+	}
+
+	return &response, nil
+}
+
+func (s *InvoiceService) MarkOverdue(ctx context.Context, invoiceID int) (*dto.InvoiceMarkOverdueResponse, error) {
+	invoice, err := s.FindByID(ctx, invoiceID)
+	if err != nil {
+		return nil, err
+	}
+
+	// sudah lunas, tidak boleh overdue
+	if invoice.PaidAmount >= invoice.Amount {
+		return nil, errConstant.ErrMarkOverdueAlreadyFullPaid
+	}
+
+	// belum lewat due date
+	if time.Now().Before(invoice.DueDate) {
+		return nil, errConstant.ErrMarkOverdueNotOverdueYet
+	}
+
+	updateReq := &dto.InvoiceUpdateRequest{
+		Status: constants.Overdue,
+	}
+
+	err = s.repository.GetInvoice().Update(ctx, updateReq, invoiceID)
+	if err != nil {
+		return nil, err
+	}
+
+	response := dto.InvoiceMarkOverdueResponse{
+		ID:     invoiceID,
+		Status: constants.Overdue,
 	}
 
 	return &response, nil

@@ -13,6 +13,10 @@ type InvoiceRequest struct {
 	Status     constants.InvoiceStatusString `json:"status"`
 }
 
+type InvoiceUpdateRequest struct {
+	Status constants.InvoiceStatusString `json:"status"`
+}
+
 type InvoiceRequestParam struct {
 	CustomerID *int `form:"customer_id"`
 }
@@ -27,4 +31,9 @@ type InvoiceResponse struct {
 	Status     constants.InvoiceStatusString `json:"status"`
 	CreatedAt  *time.Time                    `json:"created_at"`
 	UpdatedAt  *time.Time                    `json:"updated_at"`
+}
+
+type InvoiceMarkOverdueResponse struct {
+	ID     int                           `json:"id"`
+	Status constants.InvoiceStatusString `json:"status"`
 }
