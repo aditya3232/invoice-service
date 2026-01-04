@@ -116,7 +116,7 @@ func (c *InvoiceController) FindAllWithoutPagination(ctx *gin.Context) {
 		return
 	}
 
-	invoices, err := c.service.GetInvoice().FindAllWithoutPagination(ctx)
+	invoices, err := c.service.GetInvoice().FindAllWithoutPagination(ctx, &params)
 	if err != nil {
 		response.HttpResponse(response.ParamHTTPResp{
 			Code: http.StatusBadRequest,

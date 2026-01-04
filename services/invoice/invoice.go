@@ -17,7 +17,7 @@ type InvoiceService struct {
 type IInvoiceService interface {
 	FindByID(context.Context, int) (*dto.InvoiceResponse, error)
 	Create(context.Context, *dto.InvoiceRequest) (*dto.InvoiceResponse, error)
-	FindAllWithoutPagination(context.Context) ([]dto.InvoiceResponse, error)
+	FindAllWithoutPagination(context.Context, *dto.InvoiceRequestParam) ([]dto.InvoiceResponse, error)
 }
 
 func NewInvoiceService(repository repositories.IRepositoryRegistry, client clients.IClientRegistry) IInvoiceService {
@@ -79,8 +79,8 @@ func (s *InvoiceService) Create(ctx context.Context, req *dto.InvoiceRequest) (*
 	return response, nil
 }
 
-func (s *InvoiceService) FindAllWithoutPagination(ctx context.Context) ([]dto.InvoiceResponse, error) {
-	invoices, err := s.repository.GetInvoice().FindAllWithoutPagination(ctx)
+func (s *InvoiceService) FindAllWithoutPagination(ctx context.Context, req *dto.InvoiceRequestParam) ([]dto.InvoiceResponse, error) {
+	invoices, err := s.repository.GetInvoice().FindAllWithoutPagination(ctx, req)
 	if err != nil {
 		return nil, err
 	}

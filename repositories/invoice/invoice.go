@@ -20,7 +20,7 @@ type InvoiceRepository struct {
 type IInvoiceRepository interface {
 	FindByID(context.Context, int) (*models.Invoice, error)
 	Create(context.Context, *dto.InvoiceRequest) (*models.Invoice, error)
-	FindAllWithoutPagination(context.Context) ([]models.Invoice, error)
+	FindAllWithoutPagination(context.Context, *dto.InvoiceRequestParam) ([]models.Invoice, error)
 }
 
 func NewInvoiceRepository(db *gorm.DB) IInvoiceRepository {
@@ -63,11 +63,15 @@ func (r *InvoiceRepository) Create(ctx context.Context, req *dto.InvoiceRequest)
 	return &invoice, nil
 }
 
-func (r *InvoiceRepository) FindAllWithoutPagination(ctx context.Context) ([]models.Invoice, error) {
+func (r *InvoiceRepository) FindAllWithoutPagination(ctx context.Context, req *dto.InvoiceRequestParam) ([]models.Invoice, error) {
 	var invoices []models.Invoice
+	query := r.db.WithContext(ctx)
 
-	err := r.db.WithContext(ctx).Find(&invoices).Error
-	if err != nil {
+	if req.CustomerID != nil {
+		query = query.Where("customer_id = ?", req.CustomerID)
+	}
+
+	if err := query.Find(&invoices).Error; err != nil {
 		return nil, errWrap.WrapError(errConstant.ErrSQLError)
 	}
 
